@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Loader from "react-loader-spinner";
 import { useParams } from "react-router-dom";
+import Loader from "react-loader-spinner";
+import axios from "axios";
 
-const Character = () => {
-  //character comics et setloading
-  const [character, setCharacter] = useState("");
+const Character = ({ apiUrl }) => {
   const [isLoading, setIsLoading] = useState(true);
+  // Return all characters from Marvel API
+  const [character, setCharacter] = useState([]);
+  // Return all comics from marvel API
   const [comics, setComics] = useState([]);
-  const id = useParams();
+  // Return Character id
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3100/characters/${id}`
-        );
+        const response = await axios.get(`${apiUrl}/character/${id}`);
 
-        // on fait la requete aussi pour les comics
         const responseComics = await axios.get(
-          `http://localhost:3100/characters/${id}/comics`
+          `${apiUrl}/character/${id}/comics`
         );
         setComics(responseComics.data.data);
         setCharacter(response.data.data);
@@ -29,8 +28,8 @@ const Character = () => {
       }
     };
     fetchData();
-  }, [id]);
-  // on va retourner un loader avec un perso selectionné dans la home et les comics dans lesquelles il apparait
+  }, [id, apiUrl]);
+
   return isLoading ? (
     <div className="loading">
       <Loader
@@ -42,14 +41,10 @@ const Character = () => {
       />
     </div>
   ) : (
-    <div key={id}>
-      <p>{character.name[0]}</p>
-      <img
-        src={
-          character.thumbnail.path[0] + "." + character.thumbnail.extention[0]
-        }
-      />
-    </div>
+    <section className="character-section">
+      <p>les comics et perso que tu kiffes</p>
+    </section>
   );
 };
+
 export default Character;

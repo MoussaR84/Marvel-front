@@ -13,14 +13,14 @@ function App() {
     <Router>
       <Header />
       <Switch>
-        <Route path="/myfavs">
+        <Route path="/comics">
+          <Comics />
+        </Route>
+        <Route exact path="/favorites">
           <Myfavs />
         </Route>
-        <Route path="/characters/:id">
-          <Character />
-        </Route>
-        <Route path="comics">
-          <Comics />
+        <Route path="/characters">
+          <Home />
         </Route>
         <Route path="/">
           <Home />

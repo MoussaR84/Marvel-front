@@ -1,33 +1,51 @@
 import React, { useState, useEffect } from "react";
+import ReactPaginate from "react-paginate";
 import Character from "../Component/Character";
 import Loader from "react-loader-spinner";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Itemcharacter from "../Component/Itemcharacter";
+import Inputsearch from "../Component/InputSearch";
 
-const Home = () => {
+const Home = ({ apiUrl }) => {
   const [isLoading, setIsLoading] = useState(true);
+  // Search bar for characters
+  const [searchCharacter, setSearchCharacter] = useState("");
+  // Return all characters from Marvel API
   const [characters, setCharacters] = useState([]);
+  // on va devoir trier les page donc on state page maximum et page
+  // const [pageMax, setPageMax] = useState(0);
+  const [page, setPage] = useState(1);
+  // Number of results per page
+  const limit = 100;
+
+  // on handleclick sur le bas et on tournes les pages
+
+  const handlePageClick = (event) => {
+    console.log(event);
+    setPage(event.selected + 1);
+  };
 
   useEffect(() => {
-    //on va envoyer une requete au serveur qui va nous renvoyer les objets
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3100/characters`);
+        const response = await axios.get(
+          `{apiUrl}?page=${page}&name=${searchCharacter}`
+        );
+        console.log(response.data);
+        //console.log(page);
         setCharacters(response.data);
-        console.log(characters);
-        setIsLoading(false);
+        setIsLoading(true);
       } catch (error) {
         console.log(error.message);
       }
     };
 
     fetchData();
-  }, []);
-  //on va afficher un loader avec des barres et les perso
+  }, [page, searchCharacter, apiUrl]);
+
   return isLoading ? (
     <div className="loading">
-      <span>Please wait</span>
-
       <Loader
         type="Bars"
         color="#ED1F21"
@@ -37,19 +55,53 @@ const Home = () => {
       />
     </div>
   ) : (
-    <div>
-      <h1>DISCOVER OUR CHARACTERS</h1>
-      {characters.results.map((item, id) => {
-        return (
-          <div key={id}>
-            <Link to="/character">
-              <p>{item.name}</p>
-              <img src={item.thumbnail.path + "." + item.thumbnail.extention} />
-            </Link>
+    <>
+      <home>
+        <p>title="MARVEL CHARACTERS"</p>
+
+        <main>
+          <div className="main-navigation">
+            <div className="section-title">
+              <h2>MARVEL CHARACTERS LIST</h2>
+            </div>
+            <div>
+              <Link to={`/character/:id`}>
+                <Inputsearch
+                  searchItem={searchCharacter}
+                  setSearchItem={setSearchCharacter}
+                />
+              </Link>
+              );
+            </div>
+            <div>
+              <p>{characters.total} RESULTS</p>
+              <p>SORT BY A-Z</p>
+            </div>
           </div>
-        );
-      })}
-    </div>
+          <section className="characters-section">
+            {characters.results.map((item) => {
+              return <Itemcharacter key={item.id} item={item} />;
+            })}
+          </section>
+
+          <div className="pages">
+            <ReactPaginate
+              previousLabel={"PREV"}
+              nextLabel={"NEXT"}
+              breakLabel={"..."}
+              breakClassName={"break-me"}
+              marginPagesDisplayed={1}
+              pageRangeDisplayed={5}
+              onPageChange={handlePageClick}
+              containerClassName={"pagination"}
+              subContainerClassName={"pages"}
+              activeClassName={"active"}
+            />
+          </div>
+        </main>
+      </home>
+    </>
   );
 };
+
 export default Home;
